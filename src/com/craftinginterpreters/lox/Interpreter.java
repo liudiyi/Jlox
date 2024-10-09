@@ -35,9 +35,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	void executeBlock(List<Stmt> statements, Environment environment) {
-		Environment previous = this.environment;
-		try {
-			this.environment = environment;
+		// Check the definition of Environment
+		// The history environment is in the stack of this function. This function will be called many times recursively.
+		Environment previous = this.environment;//first time come to here, this.environment != environment
+		try {// why use try?
+			this.environment = environment;// Check the definition of Environment
 
 			for (Stmt statement : statements) {
 				execute(statement);
@@ -49,7 +51,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitBlockStmt(Stmt.Block stmt) {
-		executeBlock(stmt.statements, new Environment(environment));
+		executeBlock(stmt.statements, new Environment(environment));//Check the definition of Environment
 		return null;
 	}
 
