@@ -22,6 +22,21 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	}
 
 	@Override
+	public Object visitLogicalExpr(Expr.Logical expr) {
+		Object left = evaluate(expr.left);
+
+		if (expr.operator.type == TokenType.OR) {
+			if (isTruthy(left))
+				return left;
+		} else {
+			if (!isTruthy(left))
+				return left;
+		}
+
+		return evaluate(expr.right);
+	}
+
+	@Override
 	public Object visitGroupingExpr(Expr.Grouping expr) {
 		return evaluate(expr.expression);
 	}
@@ -36,8 +51,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	void executeBlock(List<Stmt> statements, Environment environment) {
 		// Check the definition of Environment
-		// The history environment is in the stack of this function. This function will be called many times recursively.
-		Environment previous = this.environment;//first time come to here, this.environment != environment
+		// The history environment is in the stack of this function. This function will
+		// be called many times recursively.
+		Environment previous = this.environment;// first time come to here, this.environment != environment
 		try {// why use try?
 			this.environment = environment;// Check the definition of Environment
 
@@ -51,13 +67,23 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
 	@Override
 	public Void visitBlockStmt(Stmt.Block stmt) {
-		executeBlock(stmt.statements, new Environment(environment));//Check the definition of Environment
+		executeBlock(stmt.statements, new Environment(environment));// Check the definition of Environment
 		return null;
 	}
 
 	@Override
 	public Void visitExpressionStmt(Stmt.Expression stmt) {
 		evaluate(stmt.expression);
+		return null;
+	}
+
+	@Override
+	public Void visitIfStmt(Stmt.If stmt) {
+		if (isTruthy(evaluate(stmt.condition))) {
+			execute(stmt.thenBranch);
+		} else if (stmt.elseBranch != null) {
+			execute(stmt.elseBranch);
+		}
 		return null;
 	}
 
@@ -78,6 +104,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 		environment.define(stmt.name.lexeme, value);
 		return null;
 	}
+	
+	@Override
+	  public Void visitWhileStmt(Stmt.While stmt) {
+	    while (isTruthy(evaluate(stmt.condition))) {
+	      execute(stmt.body);
+	    }
+	    return null;
+	  }
 
 	@Override
 	public Object visitAssignExpr(Expr.Assign expr) {
