@@ -62,7 +62,8 @@ public class Lox {
 
 		Resolver resolver = new Resolver(interpreter);
 		resolver.resolve(statements);
-
+		if (hadError)
+			return;
 		// For now, just print the tokens.
 //		for (Token token : tokens) {
 //			System.out.println(token);
