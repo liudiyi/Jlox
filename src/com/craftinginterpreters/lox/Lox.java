@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Lox {
-	
-	 private static final Interpreter interpreter = new Interpreter();
+
+	private static final Interpreter interpreter = new Interpreter();
 
 	static boolean hadError = false;
 	static boolean hadRuntimeError = false;
@@ -60,11 +60,14 @@ public class Lox {
 		if (hadError)
 			return;
 
+		Resolver resolver = new Resolver(interpreter);
+		resolver.resolve(statements);
+
 		// For now, just print the tokens.
 //		for (Token token : tokens) {
 //			System.out.println(token);
 //		}
-		
+
 		interpreter.interpret(statements);
 	}
 
